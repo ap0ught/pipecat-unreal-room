@@ -64,8 +64,7 @@ private:
 	bool StartFrameGeneration();
 	bool bFrameGenerationVSync = false;
 
-	// Puts the player at the house's door, once they're there, with the
-	// camera over their shoulder.
+	// Sets up the local player's camera and indoor walking speed once possessed.
 	void PlacePlayer();
 	FTimerHandle PlaceTimer;
 	int32 PlaceTries = 0;

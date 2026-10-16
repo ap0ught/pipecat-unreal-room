@@ -30,6 +30,7 @@ public class PipecatRoom : ModuleRules
 			"ApplicationCore",
 			"InputCore",
 			"InputDevice",
+			"Sockets",
 		});
 		if (Target.Platform == UnrealTargetPlatform.Win64)
 		{

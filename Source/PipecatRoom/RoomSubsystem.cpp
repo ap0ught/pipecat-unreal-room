@@ -6,8 +6,10 @@
 
 #include "RoomSubsystem.h"
 
+#include "RoomGameInstance.h"
 #include "RoomHouse.h"
 #include "RoomStage.h"
+#include "RoomThings.h"
 
 #include "Camera/CameraComponent.h"
 #include "Containers/Ticker.h"
@@ -149,7 +151,28 @@ void URoomSubsystem::OnWorldBeginPlay(UWorld& World)
 
 	House = World.SpawnActor<ARoomHouse>();
 	PlacePlayer();
-	StartStage();
+	const URoomGameInstance* Game = Cast<URoomGameInstance>(World.GetGameInstance());
+	if (World.GetNetMode() == NM_Client)
+	{
+		// Match the host's initial furnishing/collision without a second bot,
+		// microphone, interaction input, or independent NPC simulation.
+		if (ARoomThings* Things = World.SpawnActor<ARoomThings>(); Things && House.IsValid())
+		{
+			Things->Build(House.Get());
+			House->AddBlockers(Things);
+		}
+	}
+	else if (World.GetNetMode() != NM_DedicatedServer && !(Game && Game->HasStartupConnection()))
+	{
+		StartStage();
+	}
+	if (World.GetNetMode() == NM_ListenServer)
+	{
+		if (URoomGameInstance* Host = Cast<URoomGameInstance>(World.GetGameInstance()))
+		{
+			Host->ShowJoinLink();
+		}
+	}
 	if (!FParse::Param(FCommandLine::Get(), TEXT("PipecatNoLogo")))
 	{
 		PlayLogo(World);
@@ -169,15 +192,9 @@ void URoomSubsystem::PlacePlayer()
 		}
 		return;
 	}
-	if (House.IsValid())
+	if (AController* Controller = Player->GetController())
 	{
-		const FRoomSpot Start = House->GetPlayerStart();
-		Player->SetActorLocationAndRotation(Start.Location + FVector(0.0f, 0.0f, 100.0f), FRotator(0.0f, Start.Yaw, 0.0f), false,
-			nullptr, ETeleportType::TeleportPhysics);
-		if (AController* Controller = Player->GetController())
-		{
-			Controller->SetControlRotation(FRotator(-8.0f, Start.Yaw, 0.0f));
-		}
+		Controller->SetControlRotation(FRotator(-8.0f, Player->GetActorRotation().Yaw, 0.0f));
 	}
 	// The camera close over their shoulder, easing after them, indoors.
 	if (USpringArmComponent* Arm = Player->FindComponentByClass<USpringArmComponent>())

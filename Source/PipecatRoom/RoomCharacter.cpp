@@ -116,6 +116,8 @@ FRoomStep FRoomStep::Call(TFunction<void()> Then)
 ARoomCharacter::ARoomCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	// NPC setup and simulation belong to the host, unlike the template player.
+	bReplicates = false;
 	AutoPossessAI = EAutoPossessAI::Disabled;
 	bUseControllerRotationYaw = false;
 
