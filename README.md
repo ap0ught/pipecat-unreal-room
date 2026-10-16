@@ -11,19 +11,23 @@ you.
 
 ## Requirements
 
-- Windows (x86_64) with a ray tracing GPU (best on NVIDIA RTX).
+- Windows x86_64 or Linux x86_64.
 - Unreal Engine 5.8.
-- Visual Studio (or its Build Tools) with "Desktop development with C++",
-  "C++ CMake tools for Windows" and the ".NET Framework 4.8 SDK".
+- A C++ toolchain for your platform:
+  - Windows: Visual Studio or Build Tools with "Desktop development with C++",
+    "C++ CMake tools for Windows" and the ".NET Framework 4.8 SDK".
+  - Linux: Clang, libc++, lld, make, and the usual build tools for Unreal.
 - The [Pipecat C++ client](https://github.com/pipecat-ai/pipecat-client-cxx)
   source.
-- [uv](https://docs.astral.sh/uv/), and WSL for the bot (`wsl --install`).
+- [uv](https://docs.astral.sh/uv/), and WSL for the bot on Windows (`wsl --install`).
 - API keys: OpenAI, Cartesia, Deepgram, Jev (TypeSafe) and Daily.
 - A microphone. Headphones are best.
-- Optional: NVIDIA's DLSS 4.5 plugin for UE 5.8 (unzip `DLSS` and `Streamline*`
-  into `Plugins/`). Without it, the game uses TSR.
+- Optional: NVIDIA's DLSS 4.5 plugin for UE 5.8 on Windows (unzip `DLSS` and
+  `Streamline*` into `Plugins/`). Without it, the game uses TSR.
 
 ## Build
+
+### Windows
 
 In PowerShell, from this directory:
 
@@ -39,6 +43,23 @@ $env:PIPECAT_CLIENT_CXX = "C:\path\to\pipecat-client-cxx"
 (downloading Daily's Core SDK the first time). `setup.ps1` copies Unreal's Third
 Person template content and creates the game's materials.
 
+### Linux
+
+In a shell, from this directory:
+
+```
+export UE_ROOT="$HOME/UnrealEngine/5.8"
+export PIPECAT_CLIENT_CXX="$HOME/src/pipecat-client-cxx"
+./Plugins/Pipecat/ThirdParty/build-linux.sh
+"$UE_ROOT/Engine/Build/BatchFiles/Linux/Build.sh" PipecatRoomEditor Linux Development -Project="$PWD/PipecatRoom.uproject"
+./setup.sh
+```
+
+`build-linux.sh` builds the client and its Daily and WebSocket transports.
+`setup.sh` copies Unreal's Third Person template content and creates the game's
+materials. If your engine checkout or installed build lives somewhere else, set
+`UE_ROOT` accordingly.
+
 ## Run
 
 1. Start the bot:
@@ -49,13 +70,22 @@ Person template content and creates the game's materials.
    wsl bash ./run-wsl.sh
    ```
 
-   Without WSL, run `uv run bot.py -t websocket` and start the game with
-   `-PipecatTransport=websocket`.
+   On Linux, use `cp env.example .env` and `uv run bot.py` or `uv run bot.py -t websocket`
+   directly. On Windows without WSL, run `uv run bot.py -t websocket` and start
+   the game with `-PipecatTransport=websocket`.
 
 2. Start the game:
 
+   Windows:
+
    ```
    & "$env:UE_ROOT\Engine\Binaries\Win64\UnrealEditor.exe" "$PWD\PipecatRoom.uproject" -game
+   ```
+
+   Linux:
+
+   ```
+   "$UE_ROOT/Engine/Binaries/Linux/UnrealEditor" "$PWD/PipecatRoom.uproject" -game
    ```
 
 Walk with WASD and the mouse, or a controller. Find someone and say hello. Press
@@ -71,10 +101,18 @@ what you were doing", "can you introduce me to Juno?", "could I have some cake?"
 
 This is a two-player **listen-server** demo: the host plays and runs the server.
 Both machines need the same project version and the normal setup above. Start
-the bot on the host as usual, then host the generated house (PowerShell):
+the bot on the host as usual, then host the generated house.
+
+Windows host:
 
 ```powershell
 & "$env:UE_ROOT\Engine\Binaries\Win64\UnrealEditor.exe" "$PWD\PipecatRoom.uproject" /Engine/Maps/Entry?listen -game -port=7777 -log -AdvertiseHost=203.0.113.10
+```
+
+Linux host:
+
+```bash
+"$UE_ROOT/Engine/Binaries/Linux/UnrealEditor" "$PWD/PipecatRoom.uproject" /Engine/Maps/Entry?listen -game -port=7777 -log -AdvertiseHost=203.0.113.10
 ```
 
 Replace `203.0.113.10` with the host's public IPv4 address or DNS name for an
@@ -87,8 +125,16 @@ useful on a LAN. The log prints `Join link: unreal://203.0.113.10:7777`;
 
 Send that single link to the guest. They can launch with it:
 
+Windows guest:
+
 ```powershell
 & "$env:UE_ROOT\Engine\Binaries\Win64\UnrealEditor.exe" "$PWD\PipecatRoom.uproject" -game -ConnectUrl=unreal://203.0.113.10:7777 -log
+```
+
+Linux guest:
+
+```bash
+"$UE_ROOT/Engine/Binaries/Linux/UnrealEditor" "$PWD/PipecatRoom.uproject" -game -ConnectUrl=unreal://203.0.113.10:7777 -log
 ```
 
 Or launch normally, press **~** to open the Unreal console, and paste

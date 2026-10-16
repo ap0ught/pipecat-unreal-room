@@ -1,9 +1,3 @@
-//
-// Copyright (c) 2026, Daily
-//
-// SPDX-License-Identifier: BSD-2-Clause
-//
-
 using UnrealBuildTool;
 
 public class PipecatRoom : ModuleRules
