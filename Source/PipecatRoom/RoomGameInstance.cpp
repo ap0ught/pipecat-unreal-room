@@ -13,6 +13,7 @@
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
 #include "SocketSubsystem.h"
+#include "TimerManager.h"
 
 DEFINE_LOG_CATEGORY_STATIC(LogRoomNetwork, Log, All);
 
@@ -89,12 +90,15 @@ void URoomGameInstance::Init()
 void URoomGameInstance::OnStart()
 {
 	Super::OnStart();
-	if (!ConnectUrl.IsEmpty())
+	if (!ConnectUrl.IsEmpty() && GetWorld())
 	{
-		// GameInstance survives travel, so the command line is consumed only once.
-		const FString Link = MoveTemp(ConnectUrl);
-		ConnectUrl.Reset();
-		Join(Link);
+		// Wait for the startup world's controller and BeginPlay. GameInstance
+		// survives travel, so consume the command line only once.
+		GetWorld()->GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateWeakLambda(this, [this]() {
+			const FString Link = MoveTemp(ConnectUrl);
+			ConnectUrl.Reset();
+			Join(Link);
+		}));
 	}
 }
 

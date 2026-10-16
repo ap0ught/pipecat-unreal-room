@@ -121,7 +121,9 @@ To check on two machines (or two separate `-game` processes on one machine,
 using `127.0.0.1:7777`): host, join, walk in both windows, and confirm each
 player sees the other move. On the host, speak to a bot and try **E**. Check
 that the guest log does not start a bot connection when using `-ConnectUrl=`.
-Repeat joining via `Room.Join`, and test an Internet guest after port forwarding.
+Repeat joining via `Room.Join`; confirm the guest's previous single-player bot
+session disconnects and microphone capture stops after travel. Test an Internet
+guest after port forwarding.
 
 ## Options
 

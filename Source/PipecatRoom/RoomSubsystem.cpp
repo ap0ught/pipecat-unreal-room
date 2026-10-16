@@ -154,13 +154,18 @@ void URoomSubsystem::OnWorldBeginPlay(UWorld& World)
 	const URoomGameInstance* Game = Cast<URoomGameInstance>(World.GetGameInstance());
 	if (World.GetNetMode() == NM_Client)
 	{
-		// Match the host's initial furnishing/collision without a second bot,
-		// microphone, interaction input, or independent NPC simulation.
-		if (ARoomThings* Things = World.SpawnActor<ARoomThings>(); Things && House.IsValid())
-		{
-			Things->Build(House.Get());
-			House->AddBlockers(Things);
-		}
+		// Match initial furnishing/collision, once the house has had BeginPlay,
+		// without a second bot, microphone, interaction input or NPC simulation.
+		World.GetTimerManager().SetTimerForNextTick(FTimerDelegate::CreateWeakLambda(this, [this]() {
+			if (House.IsValid())
+			{
+				if (ARoomThings* Things = GetWorld()->SpawnActor<ARoomThings>())
+				{
+					Things->Build(House.Get());
+					House->AddBlockers(Things);
+				}
+			}
+		}));
 	}
 	else if (World.GetNetMode() != NM_DedicatedServer && !(Game && Game->HasStartupConnection()))
 	{
