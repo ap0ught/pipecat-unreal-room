@@ -84,7 +84,20 @@ FAutoConsoleCommandWithWorldAndArgs JoinLinkCommand(
 void URoomGameInstance::Init()
 {
 	Super::Init();
-	FParse::Value(FCommandLine::Get(), TEXT("ConnectUrl="), ConnectUrl);
+	FString StartupLink;
+	if (FParse::Value(FCommandLine::Get(), TEXT("ConnectUrl="), StartupLink))
+	{
+		FString Endpoint;
+		if (ParseEndpoint(StartupLink, Endpoint))
+		{
+			ConnectUrl = MoveTemp(StartupLink);
+		}
+		else
+		{
+			ConnectUrl.Reset();
+			UE_LOG(LogRoomNetwork, Warning, TEXT("Ignoring invalid startup join link."));
+		}
+	}
 }
 
 void URoomGameInstance::OnStart()

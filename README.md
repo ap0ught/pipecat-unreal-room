@@ -55,7 +55,7 @@ export PIPECAT_CLIENT_CXX="$HOME/src/pipecat-client-cxx"
 ./setup.sh
 ```
 
-`build-linux.sh` builds the client and its Daily and WebSocket transports.
+`build-linux.sh` builds the client and its WebSocket transport.
 `setup.sh` copies Unreal's Third Person template content and creates the game's
 materials. If your engine checkout or installed build lives somewhere else, set
 `UE_ROOT` accordingly.
@@ -70,9 +70,9 @@ materials. If your engine checkout or installed build lives somewhere else, set
    wsl bash ./run-wsl.sh
    ```
 
-   On Linux, use `cp env.example .env` and `uv run bot.py` or `uv run bot.py -t websocket`
-   directly. On Windows without WSL, run `uv run bot.py -t websocket` and start
-   the game with `-PipecatTransport=websocket`.
+   On Linux, use `cp env.example .env` and `uv run bot.py -t websocket` directly.
+   On Windows without WSL, run `uv run bot.py -t websocket` and start the game
+   with `-PipecatTransport=websocket`.
 
 2. Start the game:
 
@@ -85,7 +85,7 @@ materials. If your engine checkout or installed build lives somewhere else, set
    Linux:
 
    ```
-   "$UE_ROOT/Engine/Binaries/Linux/UnrealEditor" "$PWD/PipecatRoom.uproject" -game
+   "$UE_ROOT/Engine/Binaries/Linux/UnrealEditor" "$PWD/PipecatRoom.uproject" -game -PipecatTransport=websocket
    ```
 
 Walk with WASD and the mouse, or a controller. Find someone and say hello. Press
@@ -112,7 +112,7 @@ Windows host:
 Linux host:
 
 ```bash
-"$UE_ROOT/Engine/Binaries/Linux/UnrealEditor" "$PWD/PipecatRoom.uproject" /Engine/Maps/Entry?listen -game -port=7777 -log -AdvertiseHost=203.0.113.10
+"$UE_ROOT/Engine/Binaries/Linux/UnrealEditor" "$PWD/PipecatRoom.uproject" /Engine/Maps/Entry?listen -game -PipecatTransport=websocket -port=7777 -log -AdvertiseHost=203.0.113.10
 ```
 
 Replace `203.0.113.10` with the host's public IPv4 address or DNS name for an
